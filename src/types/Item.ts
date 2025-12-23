@@ -1,11 +1,6 @@
 export type ItemStatus = 'borrowed' | 'returned' | 'overdue'
 
-export type ItemCategory =
-    | 'elektronika'
-    | 'knihy'
-    | 'naradie'
-    | 'sport'
-    | 'ine'
+export type ItemCategory = 'elektronika' | 'knihy' | 'naradie' | 'sport' | 'ine'
 
 export interface Friend {
     id: string
@@ -17,12 +12,18 @@ export interface Friend {
     totalValue: number
 }
 
+export interface BorrowedItemFriend {
+    id: string
+    name: string
+    avatar?: string
+}
+
 export interface BorrowedItem {
     id: string
     itemName: string
     description: string
     category: ItemCategory
-    friend: Friend
+    friend: BorrowedItemFriend
     borrowedDate: string
     expectedReturn: string
     actualReturn: string | null
