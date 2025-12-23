@@ -12,22 +12,33 @@ export const useItemsStore = defineStore('items', {
     }),
 
     getters: {
-        activeItems: (state): BorrowedItem[] => state.items.filter(i => i.status !== 'returned'),
-        returnedItems: (state): BorrowedItem[] => state.items.filter(i => i.status === 'returned'),
+        activeItems: (state): BorrowedItem[] =>
+            state.items.filter(i => i.status !== 'returned'),
+
+        returnedItems: (state): BorrowedItem[] =>
+            state.items.filter(i => i.status === 'returned'),
+
         overdueItems: (state): BorrowedItem[] => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+
             return state.items.filter(i => {
-                if (i.status === 'returned') return false;
-                const expectedDate = new Date(i.expectedReturn);
-                return expectedDate < today;
-            });
+                if (i.status === 'returned') return false
+                const expectedDate = new Date(i.expectedReturn)
+                return expectedDate < today
+            })
         },
-        getItemById: (state) => (id: string) => state.items.find(i => i.id === id),
-        getItemsByFriend: (state) => (friendId: string) => state.items.filter(i => i.friend.id === friendId),
-        totalBorrowedValue: (state): number => state.items
-            .filter(i => i.status !== 'returned')
-            .reduce((sum, i) => sum + i.value, 0)
+
+        getItemById: (state) => (id: string) =>
+            state.items.find(i => i.id === id),
+
+        getItemsByFriend: (state) => (friendId: string) =>
+            state.items.filter(i => i.friend.id === friendId),
+
+        totalBorrowedValue: (state): number =>
+            state.items
+                .filter(i => i.status !== 'returned')
+                .reduce((sum, i) => sum + i.value, 0)
     },
 
     actions: {
@@ -37,82 +48,105 @@ export const useItemsStore = defineStore('items', {
                 id: uuidv4(),
                 actualReturn: null,
                 status: this.calculateStatus(item.expectedReturn, null)
-            };
-            this.items.push(newItem);
-            this.saveToLocalStorage();
+            }
+
+            this.items.push(newItem)
+            this.saveToLocalStorage()
         },
 
         updateItem(id: string, updates: Partial<BorrowedItem>) {
-            const index = this.items.findIndex(i => i.id === id);
-            if (index !== -1) {
-                const currentItem = this.items[index];
-                if (!currentItem) return;
+            const index = this.items.findIndex(i => i.id === id)
+            if (index === -1) return
 
-                const expectedDate = updates.expectedReturn ?? currentItem.expectedReturn;
-                const actualDate = updates.actualReturn !== undefined ? updates.actualReturn : currentItem.actualReturn;
-                const finalStatus = updates.status ?? this.calculateStatus(expectedDate, actualDate);
+            const currentItem = this.items[index]
+            if (!currentItem) return
 
-                const updatedItem = {
-                    ...currentItem,
-                    ...updates,
-                    id: currentItem.id,
-                    status: finalStatus
-                } as BorrowedItem;
+            const expectedReturn =
+                updates.expectedReturn ?? currentItem.expectedReturn
 
-                this.items[index] = updatedItem;
-                this.saveToLocalStorage();
+            const actualReturn =
+                updates.actualReturn !== undefined
+                    ? updates.actualReturn
+                    : currentItem.actualReturn
+
+            const finalStatus =
+                updates.status ?? this.calculateStatus(expectedReturn, actualReturn)
+
+            this.items[index] = {
+                ...currentItem,
+                ...updates,
+                id: currentItem.id,
+                status: finalStatus
             }
+
+            this.saveToLocalStorage()
         },
 
         returnItem(id: string, returnDate?: string) {
-            const finalDate = returnDate || new Date().toISOString().split('T')[0];
+            const finalDate =
+                returnDate || new Date().toISOString().split('T')[0]
+
             this.updateItem(id, {
-                actualReturn: finalDate as string,
+                actualReturn: finalDate,
                 status: 'returned'
-            });
+            })
         },
 
         deleteItem(id: string) {
-            const index = this.items.findIndex(i => i.id === id);
-            if (index !== -1) {
-                this.items.splice(index, 1);
-                this.saveToLocalStorage();
-            }
+            const index = this.items.findIndex(i => i.id === id)
+            if (index === -1) return
+
+            this.items.splice(index, 1)
+            this.saveToLocalStorage()
         },
 
-        calculateStatus(expectedReturn: string, actualReturn: string | null): ItemStatus {
-            if (actualReturn) return 'returned';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const exp = new Date(expectedReturn);
-            return exp < today ? 'overdue' : 'borrowed';
+        calculateStatus(
+            expectedReturn: string,
+            actualReturn: string | null
+        ): ItemStatus {
+            if (actualReturn) return 'returned'
+
+            const today = new Date()
+            today.setHours(0, 0, 0, 0)
+
+            const expected = new Date(expectedReturn)
+            return expected < today ? 'overdue' : 'borrowed'
         },
 
         updateAllStatuses() {
-            this.items.forEach(i => {
-                if (i.status !== 'returned') {
-                    i.status = this.calculateStatus(i.expectedReturn, i.actualReturn);
+            this.items.forEach(item => {
+                if (item.status !== 'returned') {
+                    item.status = this.calculateStatus(
+                        item.expectedReturn,
+                        item.actualReturn
+                    )
                 }
-            });
-            this.saveToLocalStorage();
+            })
+
+            this.saveToLocalStorage()
         },
 
         saveToLocalStorage() {
-            localStorage.setItem('borrowTracker_items', JSON.stringify(this.items));
+            localStorage.setItem(
+                'borrowTracker_items',
+                JSON.stringify(this.items)
+            )
         },
 
         loadFromLocalStorage() {
-            const stored = localStorage.getItem('borrowTracker_items');
-            if (stored) {
-                try {
-                    this.items = JSON.parse(stored);
-                    this.updateAllStatuses();
-                } catch (e) {
-                    console.error("Помилка завантаження даних", e);
-                    this.initMockData();
-                }
-            } else {
-                this.initMockData();
+            const stored = localStorage.getItem('borrowTracker_items')
+
+            if (!stored) {
+                this.initMockData()
+                return
+            }
+
+            try {
+                this.items = JSON.parse(stored)
+                this.updateAllStatuses()
+            } catch (e) {
+                console.error('Помилка завантаження даних', e)
+                this.initMockData()
             }
         },
 
@@ -125,11 +159,7 @@ export const useItemsStore = defineStore('items', {
                     category: 'elektronika',
                     friend: {
                         id: '1',
-                        name: 'Peter Novák',
-                        email: 'peter@example.com',
-                        phone: '+421900111222',
-                        borrowedCount: 1,
-                        totalValue: 550
+                        name: 'Peter Novák'
                     },
                     borrowedDate: '2024-11-15',
                     expectedReturn: '2024-12-30',
@@ -145,11 +175,7 @@ export const useItemsStore = defineStore('items', {
                     category: 'naradie',
                     friend: {
                         id: '2',
-                        name: 'Jana Kováčová',
-                        email: 'jana@example.com',
-                        phone: '+421900333444',
-                        borrowedCount: 1,
-                        totalValue: 120
+                        name: 'Jana Kováčová'
                     },
                     borrowedDate: '2024-10-05',
                     expectedReturn: '2024-11-10',
@@ -157,9 +183,10 @@ export const useItemsStore = defineStore('items', {
                     status: 'overdue',
                     value: 120
                 }
-            ];
-            this.items = mockItems;
-            this.saveToLocalStorage();
+            ]
+
+            this.items = mockItems
+            this.saveToLocalStorage()
         }
     }
-});
+})
