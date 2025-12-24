@@ -135,17 +135,21 @@ export const useItemsStore = defineStore('items', {
 
         loadFromLocalStorage() {
             const stored = localStorage.getItem('borrowTracker_items')
-
-            if (!stored) {
+            if (this.items.length > 0) return
+            if (stored === null) {
                 this.initMockData()
                 return
             }
-
             try {
-                this.items = JSON.parse(stored)
-                this.updateAllStatuses()
+                const parsed = JSON.parse(stored)
+                if (Array.isArray(parsed)) {
+                    this.items = parsed
+                    this.updateAllStatuses()
+                } else {
+                    this.initMockData()
+                }
             } catch (e) {
-                console.error('Помилка завантаження даних', e)
+                console.error('Pomилка завантаження даних', e)
                 this.initMockData()
             }
         },

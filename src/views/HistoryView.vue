@@ -2,7 +2,7 @@
   <div class="history-view">
     <h1>História vrátených vecí</h1>
 
-    <div v-if="returnedItems.length > 0" class="items-grid">
+    <div v-if="returnedItems.length" class="items-grid">
       <ItemCard
           v-for="item in returnedItems"
           :key="item.id"
@@ -27,6 +27,7 @@ import ItemCard from '@/components/items/ItemCard.vue'
 export default defineComponent({
   name: 'HistoryView',
   components: { ItemCard },
+
   computed: {
     itemsStore() {
       return useItemsStore()
@@ -35,9 +36,7 @@ export default defineComponent({
       return this.itemsStore.returnedItems
     }
   },
-  mounted() {
-    this.itemsStore.loadFromLocalStorage()
-  },
+
   methods: {
     handleView(id: string) {
       this.$router.push({ name: 'ItemDetail', params: { id } })
@@ -48,26 +47,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped>
-.history-view {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-h1 {
-  margin-bottom: 32px;
-}
-.items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-}
-.empty-state {
-  text-align: center;
-  padding: 64px;
-}
-.empty-icon {
-  font-size: 64px;
-}
-</style>

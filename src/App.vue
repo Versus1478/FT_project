@@ -30,12 +30,28 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted } from 'vue'
+import { useItemsStore } from '@/stores/items'
+import useFriendsStore from '@/stores/friends'
 
 export default defineComponent({
-  name: 'App'
+  name: 'App',
+  setup() {
+    const itemsStore = useItemsStore()
+    const friendsStore = useFriendsStore()
+
+    onMounted(() => {
+      friendsStore.loadFromLocalStorage()
+      itemsStore.loadFromLocalStorage()
+      itemsStore.updateAllStatuses()
+      friendsStore.updateAllStats()
+    })
+
+    return {}
+  }
 })
 </script>
+
 
 <style>
 * {

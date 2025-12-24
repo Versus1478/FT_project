@@ -6,19 +6,30 @@
       <form @submit.prevent="handleSubmit">
         <div class="form-group">
           <label>Názov veci *</label>
-          <input v-model="form.itemName" type="text" required class="form-input" />
+          <input
+              v-model="form.itemName"
+              type="text"
+              required
+              class="form-input"
+              placeholder="napr. PlayStation 5"
+          />
         </div>
 
         <div class="form-group">
           <label>Popis</label>
-          <textarea v-model="form.description" rows="3" class="form-input"></textarea>
+          <textarea
+              v-model="form.description"
+              rows="3"
+              class="form-input"
+              placeholder="Krátky popis veci..."
+          />
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Kategória *</label>
             <select v-model="form.category" required class="form-input">
-              <option value="">Vyberte...</option>
+              <option value="">Vyberte kategóriu...</option>
               <option value="elektronika">💻 Elektronika</option>
               <option value="knihy">📚 Knihy</option>
               <option value="naradie">🔨 Náradie</option>
@@ -44,10 +55,15 @@
           <label>Požičané komu *</label>
           <select v-model="form.friendId" required class="form-input">
             <option value="">Vyberte priateľa...</option>
-            <option v-for="friend in friends" :key="friend.id" :value="friend.id">
+            <option
+                v-for="friend in friends"
+                :key="friend.id"
+                :value="friend.id"
+            >
               {{ friend.name }}
             </option>
           </select>
+
           <router-link to="/friends" class="add-friend-link">
             + Pridať nového priateľa
           </router-link>
@@ -56,23 +72,43 @@
         <div class="form-row">
           <div class="form-group">
             <label>Dátum požičania *</label>
-            <input v-model="form.borrowedDate" type="date" required class="form-input" />
+            <input
+                v-model="form.borrowedDate"
+                type="date"
+                required
+                class="form-input"
+            />
           </div>
 
           <div class="form-group">
             <label>Očakávané vrátenie *</label>
-            <input v-model="form.expectedReturn" type="date" required class="form-input" />
+            <input
+                v-model="form.expectedReturn"
+                type="date"
+                required
+                class="form-input"
+            />
           </div>
         </div>
 
         <div class="form-group">
           <label>Poznámky</label>
-          <textarea v-model="form.notes" rows="2" class="form-input"></textarea>
+          <textarea
+              v-model="form.notes"
+              rows="2"
+              class="form-input"
+          />
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Pridať požičku</button>
-          <button type="button" @click="$router.push('/')" class="btn btn-secondary">
+          <button type="submit" class="btn btn-primary">
+            Pridať požičku
+          </button>
+          <button
+              type="button"
+              class="btn btn-secondary"
+              @click="handleCancel"
+          >
             Zrušiť
           </button>
         </div>
@@ -86,27 +122,20 @@ import { defineComponent } from 'vue'
 import { useItemsStore } from '@/stores/items'
 import  useFriendsStore  from '@/stores/friends'
 import type { ItemCategory } from '@/types/Item'
-
-interface AddItemForm {
-  itemName: string
-  description: string
-  category: ItemCategory | ''
-  value: number
-  friendId: string
-  borrowedDate: string
-  expectedReturn: string
-  notes: string
-}
+import type { Friend } from '@/types/Item.ts'
 
 export default defineComponent({
   name: 'AddItemView',
 
-  data(): { form: AddItemForm } {
+  data() {
     return {
+      itemsStore: useItemsStore(),
+      friendsStore: useFriendsStore(),
+
       form: {
         itemName: '',
         description: '',
-        category: '',
+        category: '' as ItemCategory | '',
         value: 0,
         friendId: '',
         borrowedDate: new Date().toISOString().slice(0, 10),
@@ -117,12 +146,6 @@ export default defineComponent({
   },
 
   computed: {
-    itemsStore() {
-      return useItemsStore()
-    },
-    friendsStore() {
-      return useFriendsStore()
-    },
     friends() {
       return this.friendsStore.friends
     }
@@ -130,6 +153,7 @@ export default defineComponent({
 
   mounted() {
     this.friendsStore.loadFromLocalStorage()
+
     if (this.friends.length === 0) {
       this.friendsStore.initMockData()
     }
@@ -137,9 +161,22 @@ export default defineComponent({
 
   methods: {
     handleSubmit() {
-      const friend = this.friends.find(f => f.id === this.form.friendId)
+      const friend = this.friends.find(
+          (f: Friend) => f.id === this.form.friendId
+      )
+
       if (!friend) {
-        alert('Vyberte priateľa')
+        alert('Vyberte priateľa zo zoznamu')
+        return
+      }
+
+      if (!this.form.category) {
+        alert('Vyberte kategóriu')
+        return
+      }
+
+      if (this.form.expectedReturn < this.form.borrowedDate) {
+        alert('Dátum vrátenia nemôže byť pred dátumom požičania')
         return
       }
 
@@ -159,7 +196,14 @@ export default defineComponent({
       })
 
       this.friendsStore.updateFriendStats(friend.id)
+      alert('✅ Požička úspešne pridaná!')
       this.$router.push('/')
+    },
+
+    handleCancel() {
+      if (confirm('Naozaj chcete zrušiť pridávanie požičky?')) {
+        this.$router.push('/')
+      }
     }
   }
 })
