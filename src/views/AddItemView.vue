@@ -1,210 +1,218 @@
 <template>
-  <div class="add-item-view">
-    <div class="form-container">
-      <h1>Pridať novú požičku</h1>
+  <v-container class="add-item-view" max-width="700px">
+    <v-card elevation="2" class="pa-6">
+      <v-card-title>
+        <h1>Pridať novú požičku</h1>
+      </v-card-title>
 
-      <form @submit.prevent="handleSubmit">
-        <div class="form-group">
-          <label>Názov veci *</label>
-          <input
+      <v-card-text>
+        <v-form ref="formRef" v-model="valid" @submit.prevent="handleSubmit">
+          <v-text-field
               v-model="form.itemName"
-              type="text"
-              required
-              class="form-input"
+              label="Názov veci *"
               placeholder="napr. PlayStation 5"
+              :rules="[v => !!v || 'Pole je povinné']"
+              required
           />
-        </div>
 
-        <div class="form-group">
-          <label>Popis</label>
-          <textarea
+          <v-textarea
               v-model="form.description"
-              rows="3"
-              class="form-input"
+              label="Popis"
               placeholder="Krátky popis veci..."
+              rows="3"
           />
-        </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Kategória *</label>
-            <select v-model="form.category" required class="form-input">
-              <option value="">Vyberte kategóriu...</option>
-              <option value="elektronika">💻 Elektronika</option>
-              <option value="knihy">📚 Knihy</option>
-              <option value="naradie">🔨 Náradie</option>
-              <option value="sport">⚽ Šport</option>
-              <option value="ine">📦 Iné</option>
-            </select>
-          </div>
+          <v-row class="mt-4" dense>
+            <v-col cols="6">
+              <v-select
+                  v-model="form.category"
+                  :items="categories"
+                  label="Kategória *"
+                  item-title="title"
+                  item-value="value"
+                  :rules="[v => !!v || 'Vyberte kategóriu']"
+                  required
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                  v-model.number="form.value"
+                  label="Hodnota (€) *"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  :rules="[v => v >= 0 || 'Hodnota musí byť >= 0']"
+                  required
+              />
+            </v-col>
+          </v-row>
 
-          <div class="form-group">
-            <label>Hodnota (€) *</label>
-            <input
-                v-model.number="form.value"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                class="form-input"
-            />
-          </div>
-        </div>
+          <v-select
+              v-model="form.friendId"
+              :items="friends"
+              item-title="name"
+              item-value="id"
+              label="Požičané komu *"
+              :rules="[v => !!v || 'Vyberte priateľa']"
+              required
+          />
 
-        <div class="form-group">
-          <label>Požičané komu *</label>
-          <select v-model="form.friendId" required class="form-input">
-            <option value="">Vyberte priateľa...</option>
-            <option
-                v-for="friend in friends"
-                :key="friend.id"
-                :value="friend.id"
-            >
-              {{ friend.name }}
-            </option>
-          </select>
+          <v-row class="mt-4" dense>
+            <v-col cols="6">
+              <v-menu
+                  v-model="borrowedMenu"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+              >
+                <template #activator="{ props }">
+                  <v-text-field
+                      v-model="form.borrowedDate"
+                      label="Dátum požičania *"
+                      readonly
+                      v-bind="props"
+                  />
+                </template>
+                <v-date-picker
+                    v-model="form.borrowedDate"
+                    @input="borrowedMenu = false"
+                />
+              </v-menu>
+            </v-col>
 
-          <router-link to="/friends" class="add-friend-link">
-            + Pridať nového priateľa
-          </router-link>
-        </div>
+            <v-col cols="6">
+              <v-menu
+                  v-model="returnMenu"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+              >
+                <template #activator="{ props }">
+                  <v-text-field
+                      v-model="form.expectedReturn"
+                      label="Očakávané vrátenie *"
+                      readonly
+                      v-bind="props"
+                  />
+                </template>
+                <v-date-picker
+                    v-model="form.expectedReturn"
+                    @input="returnMenu = false"
+                />
+              </v-menu>
+            </v-col>
+          </v-row>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Dátum požičania *</label>
-            <input
-                v-model="form.borrowedDate"
-                type="date"
-                required
-                class="form-input"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Očakávané vrátenie *</label>
-            <input
-                v-model="form.expectedReturn"
-                type="date"
-                required
-                class="form-input"
-            />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Poznámky</label>
-          <textarea
+          <v-textarea
               v-model="form.notes"
+              label="Poznámky"
               rows="2"
-              class="form-input"
           />
-        </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary">
-            Pridať požičku
-          </button>
-          <button
-              type="button"
-              class="btn btn-secondary"
-              @click="handleCancel"
-          >
-            Zrušiť
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
+          <v-card-actions class="mt-6 justify-space-between">
+            <v-btn color="primary" type="submit">Pridať požičku</v-btn>
+            <v-btn color="secondary" @click="handleCancel">Zrušiť</v-btn>
+          </v-card-actions>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import { useItemsStore } from '@/stores/items'
-import  useFriendsStore  from '@/stores/friends'
-import type { ItemCategory } from '@/types/Item'
-import type { Friend } from '@/types/Item.ts'
+import useFriendsStore from '@/stores/friends'
+import type { ItemCategory, Friend } from '@/types/Item'
 
 export default defineComponent({
   name: 'AddItemView',
+  setup() {
+    const itemsStore = useItemsStore()
+    const friendsStore = useFriendsStore()
 
-  data() {
-    return {
-      itemsStore: useItemsStore(),
-      friendsStore: useFriendsStore(),
+    const valid = ref(false)
+    const formRef = ref()
+    const borrowedMenu = ref(false)
+    const returnMenu = ref(false)
 
-      form: {
-        itemName: '',
-        description: '',
-        category: '' as ItemCategory | '',
-        value: 0,
-        friendId: '',
-        borrowedDate: new Date().toISOString().slice(0, 10),
-        expectedReturn: '',
-        notes: ''
-      }
-    }
-  },
+    const form = ref({
+      itemName: '',
+      description: '',
+      category: '' as ItemCategory | '',
+      value: 0,
+      friendId: '',
+      borrowedDate: new Date().toISOString().slice(0, 10),
+      expectedReturn: '',
+      notes: ''
+    })
 
-  computed: {
-    friends() {
-      return this.friendsStore.friends
-    }
-  },
+    const friends = friendsStore.friends
+    const categories = [
+      { title: '💻 Elektronika', value: 'elektronika' },
+      { title: '📚 Knihy', value: 'knihy' },
+      { title: '🔨 Náradie', value: 'naradie' },
+      { title: '⚽ Šport', value: 'sport' },
+      { title: '📦 Iné', value: 'ine' }
+    ]
 
-  mounted() {
-    this.friendsStore.loadFromLocalStorage()
+    onMounted(() => {
+      friendsStore.loadFromLocalStorage()
+      if (!friends.length) friendsStore.initMockData()
+    })
 
-    if (this.friends.length === 0) {
-      this.friendsStore.initMockData()
-    }
-  },
+    const handleSubmit = () => {
+      const friend = friends.find((f: Friend) => f.id === form.value.friendId)
+      if (!friend) return alert('Vyberte priateľa')
+      if (!form.value.category) return alert('Vyberte kategóriu')
+      if (form.value.expectedReturn < form.value.borrowedDate)
+        return alert('Dátum vrátenia nemôže byť pred dátumom požičania')
 
-  methods: {
-    handleSubmit() {
-      const friend = this.friends.find(
-          (f: Friend) => f.id === this.form.friendId
-      )
-
-      if (!friend) {
-        alert('Vyberte priateľa zo zoznamu')
-        return
-      }
-
-      if (!this.form.category) {
-        alert('Vyberte kategóriu')
-        return
-      }
-
-      if (this.form.expectedReturn < this.form.borrowedDate) {
-        alert('Dátum vrátenia nemôže byť pred dátumom požičania')
-        return
-      }
-
-      this.itemsStore.addItem({
-        itemName: this.form.itemName,
-        description: this.form.description,
-        category: this.form.category as ItemCategory,
+      itemsStore.addItem({
+        itemName: form.value.itemName,
+        description: form.value.description,
+        category: form.value.category as ItemCategory,
         friend: {
           id: friend.id,
           name: friend.name,
           avatar: friend.avatar
         },
-        borrowedDate: this.form.borrowedDate,
-        expectedReturn: this.form.expectedReturn,
-        value: this.form.value,
-        notes: this.form.notes
+        borrowedDate: form.value.borrowedDate,
+        expectedReturn: form.value.expectedReturn,
+        value: form.value.value,
+        notes: form.value.notes
       })
 
-      this.friendsStore.updateFriendStats(friend.id)
+      friendsStore.updateFriendStats(friend.id)
       alert('✅ Požička úspešne pridaná!')
-      this.$router.push('/')
-    },
+      window.location.href = '/'
+    }
 
-    handleCancel() {
+    const handleCancel = () => {
       if (confirm('Naozaj chcete zrušiť pridávanie požičky?')) {
-        this.$router.push('/')
+        window.location.href = '/'
       }
+    }
+
+    return {
+      form,
+      valid,
+      formRef,
+      friends,
+      categories,
+      borrowedMenu,
+      returnMenu,
+      handleSubmit,
+      handleCancel
     }
   }
 })
 </script>
+
+<style scoped>
+.add-item-view {
+  margin-top: 32px;
+}
+</style>

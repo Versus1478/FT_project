@@ -1,94 +1,65 @@
 <template>
-  <div id="app">
-    <nav class="main-nav">
-      <div class="nav-container">
+  <v-app id="app">
+    <v-app-bar app color="white" flat elevate-on-scroll>
+      <v-container class="d-flex justify-space-between align-center" fluid>
         <router-link to="/" class="logo">📦 Borrow Tracker</router-link>
-        <div class="nav-links">
+
+        <v-btn-toggle rounded class="nav-links">
           <router-link to="/" class="nav-link">Dashboard</router-link>
           <router-link to="/friends" class="nav-link">Priatelia</router-link>
           <router-link to="/history" class="nav-link">História</router-link>
           <router-link to="/stats" class="nav-link">Štatistiky</router-link>
           <router-link to="/add-item" class="nav-link btn-add">+ Pridať</router-link>
-        </div>
-      </div>
-    </nav>
+        </v-btn-toggle>
+      </v-container>
+    </v-app-bar>
 
-    <main class="main-content">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-    </main>
+    <v-main class="app-main">
+      <v-container class="main-content" fluid>
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </v-container>
+    </v-main>
 
-    <footer class="main-footer">
-      <div class="footer-container">
+    <v-footer color="white" padless>
+      <v-container class="footer-container text-center" fluid>
         <p>&copy; 2026 Borrow Tracker - Svider Vladyslav</p>
-      </div>
-    </footer>
-  </div>
+      </v-container>
+    </v-footer>
+  </v-app>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from 'vue'
+import { defineComponent } from 'vue'
 import { useItemsStore } from '@/stores/items'
 import useFriendsStore from '@/stores/friends'
 
 export default defineComponent({
   name: 'App',
-  setup() {
-    const itemsStore = useItemsStore()
-    const friendsStore = useFriendsStore()
 
-    onMounted(() => {
-      friendsStore.loadFromLocalStorage()
-      itemsStore.loadFromLocalStorage()
-      itemsStore.updateAllStatuses()
-      friendsStore.updateAllStats()
-    })
+  data() {
+    return {
+      itemsStore: useItemsStore(),
+      friendsStore: useFriendsStore()
+    }
+  },
 
-    return {}
+  mounted() {
+    this.friendsStore.loadFromLocalStorage()
+    this.itemsStore.loadFromLocalStorage()
+    this.itemsStore.updateAllStatuses()
+    this.friendsStore.updateAllStats()
   }
 })
 </script>
 
-
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #f3f4f6;
-  color: #1f2937;
-  line-height: 1.6;
-}
-
-#app {
+<style scoped>
+.app-main {
+  background: #f9fafb;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.main-nav {
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 64px;
 }
 
 .logo {
@@ -133,21 +104,10 @@ body {
 }
 
 .main-content {
-  flex: 1;
   padding: 32px 0;
 }
 
-.main-footer {
-  background: white;
-  border-top: 1px solid #e5e7eb;
-  padding: 24px 0;
-}
-
 .footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  text-align: center;
   color: #6b7280;
   font-size: 14px;
 }
@@ -160,5 +120,11 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.v-main {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 </style>
