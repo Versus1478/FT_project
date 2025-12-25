@@ -23,6 +23,7 @@ export interface BorrowedItem {
     itemName: string
     description: string
     category: ItemCategory
+    friendId: string;
     friend: BorrowedItemFriend
     borrowedDate: string
     expectedReturn: string

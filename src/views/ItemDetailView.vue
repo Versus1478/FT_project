@@ -1,33 +1,90 @@
 <template>
-  <div class="item-detail-container">
-    <button @click="$router.push('/')" class="back-btn">← Späť</button>
-
+  <div class="item-detail-view">
     <div v-if="item" class="detail-card">
-      <div class="detail-header">
-        <h1>{{ item.itemName }}</h1>
-        <span :class="statusClass(item.status)" class="status-badge">{{ item.status }}</span>
+      <div class="card-top-bar">
+        <button @click="$router.push('/')" class="btn-back-highlight">
+          <span class="icon">←</span> Späť na prehľad
+        </button>
       </div>
 
-      <div class="detail-body">
-        <div class="info-row"><span class="label">Kategória:</span><span>{{ getCategoryName(item.category) }}</span></div>
-        <div class="info-row"><span class="label">Popis:</span><span>{{ item.description || '-' }}</span></div>
-        <div class="info-row"><span class="label">Hodnota:</span><span>{{ item.value }} €</span></div>
-        <div class="info-row"><span class="label">Požičané:</span><span>{{ item.friend.name }}</span></div>
-        <div class="info-row"><span class="label">Dátum požičania:</span><span>{{ formatDate(item.borrowedDate) }}</span></div>
-        <div class="info-row"><span class="label">Vrátiť do:</span><span>{{ formatDate(item.expectedReturn) }}</span></div>
-        <div v-if="item.actualReturn" class="info-row"><span class="label">Vrátené:</span><span>{{ formatDate(item.actualReturn) }}</span></div>
-        <div v-if="item.notes" class="info-row"><span class="label">Poznámky:</span><span>{{ item.notes }}</span></div>
+      <div class="card-header">
+        <div class="title-group">
+          <h1>{{ item.itemName }}</h1>
+          <span :class="['status-badge', getStatusClass(item.status)]">
+            {{ formatStatusLabel(item.status) }}
+          </span>
+        </div>
+        <div class="category-tag">
+          {{ getCategoryLabel(item.category) }}
+        </div>
       </div>
 
-      <div class="actions">
-        <button v-if="item.status !== 'returned'" @click="handleReturn" class="btn btn-success">Označiť ako vrátené</button>
-        <button @click="handleDelete" class="btn btn-danger">Vymazať</button>
+      <div class="card-body">
+        <div class="info-section">
+          <h3>Všeobecné informácie</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Popis:</span>
+              <span class="value">{{ item.description || 'Bez popisu' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Hodnota:</span>
+              <span class="value highlight-price">{{ item.value }} €</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Požičal si:</span>
+              <span class="value friend-name">👤 {{ item.friend.name }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Časová os</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Dátum vypožičania:</span>
+              <span class="value">{{ formatDateDisplay(item.borrowedDate) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Predpokladané vrátenie:</span>
+              <span class="value">{{ formatDateDisplay(item.expectedReturn) }}</span>
+            </div>
+            <div v-if="item.actualReturn" class="info-item">
+              <span class="label">Vrátené dňa:</span>
+              <span class="value success-text">{{ formatDateDisplay(item.actualReturn) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="item.notes" class="info-section">
+          <h3>Poznámky</h3>
+          <div class="notes-display">
+            {{ item.notes }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="action-buttons">
+          <button
+              v-if="item.status !== 'returned'"
+              @click="processReturn"
+              class="btn btn-success"
+          >
+            Označiť ako vrátené
+          </button>
+          <button @click="processDelete" class="btn btn-danger-outline">
+            Vymazať záznam
+          </button>
+        </div>
       </div>
     </div>
 
-    <div v-else class="not-found">
-      <h2>Požička nenájdená</h2>
-      <button @click="$router.push('/')" class="btn btn-primary">Späť</button>
+    <div v-else class="not-found-state">
+      <div class="empty-icon">🔍</div>
+      <h2>Záznam sa nenašiel</h2>
+      <p>Položka, ktorú hľadáte, neexistuje alebo bola odstránená.</p>
+      <button @click="$router.push('/')" class="btn btn-primary">Späť na zoznam</button>
     </div>
   </div>
 </template>
@@ -40,9 +97,13 @@ import { sk } from 'date-fns/locale'
 
 export default defineComponent({
   name: 'ItemDetailView',
-  props: { id: { type: String, required: true } },
+  props: {
+    id: { type: String, required: true }
+  },
   data() {
-    return { itemsStore: useItemsStore() }
+    return {
+      itemsStore: useItemsStore()
+    }
   },
   computed: {
     item() {
@@ -50,31 +111,40 @@ export default defineComponent({
     }
   },
   methods: {
-    formatDate(d: string) {
-      return format(new Date(d), 'd.M.yyyy', { locale: sk })
+    formatDateDisplay(dateString: string) {
+      if (!dateString) return '-'
+      return format(new Date(dateString), 'd. MMMM yyyy', { locale: sk })
     },
-    getCategoryName(cat: string) {
-      return {
+    getCategoryLabel(category: string) {
+      const categories: Record<string, string> = {
         elektronika: '💻 Elektronika',
         knihy: '📚 Knihy',
         naradie: '🔨 Náradie',
         sport: '⚽ Šport',
         ine: '📦 Iné'
-      }[cat] || cat
+      }
+      return categories[category] || category
     },
-    statusClass(status: string) {
-      switch (status) {
-        case 'borrowed': return 'status-borrowed'
-        case 'overdue': return 'status-overdue'
-        case 'returned': return 'status-returned'
-        default: return 'status-default'
+    formatStatusLabel(status: string) {
+      const labels: Record<string, string> = {
+        borrowed: 'Požičané',
+        overdue: 'Po termíne',
+        returned: 'Vrátené'
+      }
+      return labels[status] || status
+    },
+    getStatusClass(status: string) {
+      return {
+        'status-borrowed': status === 'borrowed',
+        'status-overdue': status === 'overdue',
+        'status-returned': status === 'returned'
       }
     },
-    handleReturn() {
+    processReturn() {
       this.itemsStore.returnItem(this.id)
     },
-    handleDelete() {
-      if (confirm('Vymazať?')) {
+    processDelete() {
+      if (confirm('Naozaj chcete tento záznam natrvalo vymazať?')) {
         this.itemsStore.deleteItem(this.id)
         this.$router.push('/')
       }
@@ -84,48 +154,187 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.item-detail-container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 0 20px;
-  font-family: Arial, sans-serif;
+.item-detail-view {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 40px 20px;
 }
-.back-btn {
-  margin-bottom: 20px;
-  color: #3b82f6;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
+
 .detail-card {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  padding: 30px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 }
-.detail-header {
+
+.card-top-bar {
+  padding: 24px 32px 0 32px;
+}
+
+.btn-back-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #4b5563;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back-highlight:hover {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.card-header {
+  padding: 24px 32px 32px 32px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  align-items: flex-start;
+  border-bottom: 1px solid #f3f4f6;
 }
-.detail-header h1 { font-size: 24px; margin: 0; }
-.status-badge { padding: 4px 12px; border-radius: 12px; font-size: 14px; color: #fff; text-transform: capitalize; }
-.status-borrowed { background-color: #3b82f6; }
-.status-overdue { background-color: #ef4444; }
-.status-returned { background-color: #10b981; }
-.status-default { background-color: #6b7280; }
-.detail-body { display: flex; flex-direction: column; gap: 10px; }
-.info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e7eb; }
-.label { font-weight: 600; }
-.actions { margin-top: 20px; display: flex; gap: 10px; }
-.btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
-.btn-success { background-color: #10b981; color: white; }
-.btn-success:hover { background-color: #059669; }
-.btn-danger { background-color: #ef4444; color: white; }
-.btn-danger:hover { background-color: #dc2626; }
-.btn-primary { background-color: #3b82f6; color: white; }
-.btn-primary:hover { background-color: #2563eb; }
-.not-found { text-align: center; padding: 60px 0; }
+
+.title-group h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-borrowed { background: #eff6ff; color: #1d4ed8; }
+.status-overdue { background: #fff1f2; color: #e11d48; }
+.status-returned { background: #f0fdf4; color: #15803d; }
+
+.category-tag {
+  background: #f9fafb;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  border: 1px solid #f3f4f6;
+}
+
+.card-body {
+  padding: 32px;
+}
+
+.info-section {
+  margin-bottom: 32px;
+}
+
+.info-section h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.highlight-price {
+  color: #3b82f6;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.notes-display {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 12px;
+  color: #4b5563;
+  line-height: 1.6;
+  border: 1px solid #f3f4f6;
+}
+
+.card-footer {
+  padding: 32px;
+  background: #fafafa;
+  border-top: 1px solid #f3f4f6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.btn {
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-success {
+  background: #10b981;
+  color: white;
+  border: none;
+  flex: 2;
+}
+
+.btn-success:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.btn-danger-outline {
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid #fee2e2;
+  flex: 1;
+}
+
+.btn-danger-outline:hover {
+  background: #fef2f2;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.not-found-state {
+  text-align: center;
+  padding: 80px 40px;
+  background: white;
+  border-radius: 20px;
+}
+
+.empty-icon { font-size: 60px; margin-bottom: 20px; }
 </style>
