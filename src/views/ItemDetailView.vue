@@ -41,24 +41,18 @@ import { sk } from 'date-fns/locale'
 export default defineComponent({
   name: 'ItemDetailView',
   props: { id: { type: String, required: true } },
-
   data() {
-    return {
-      itemsStore: useItemsStore()
-    }
+    return { itemsStore: useItemsStore() }
   },
-
   computed: {
     item() {
       return this.itemsStore.getItemById(this.id)
     }
   },
-
   methods: {
     formatDate(d: string) {
       return format(new Date(d), 'd.M.yyyy', { locale: sk })
     },
-
     getCategoryName(cat: string) {
       return {
         elektronika: '💻 Elektronika',
@@ -68,7 +62,6 @@ export default defineComponent({
         ine: '📦 Iné'
       }[cat] || cat
     },
-
     statusClass(status: string) {
       switch (status) {
         case 'borrowed': return 'status-borrowed'
@@ -77,11 +70,9 @@ export default defineComponent({
         default: return 'status-default'
       }
     },
-
     handleReturn() {
       this.itemsStore.returnItem(this.id)
     },
-
     handleDelete() {
       if (confirm('Vymazať?')) {
         this.itemsStore.deleteItem(this.id)
@@ -99,7 +90,6 @@ export default defineComponent({
   padding: 0 20px;
   font-family: Arial, sans-serif;
 }
-
 .back-btn {
   margin-bottom: 20px;
   color: #3b82f6;
@@ -108,81 +98,34 @@ export default defineComponent({
   cursor: pointer;
   font-size: 16px;
 }
-
 .detail-card {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   padding: 30px;
 }
-
 .detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
-
-.detail-header h1 {
-  font-size: 24px;
-  margin: 0;
-}
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 14px;
-  color: #fff;
-  text-transform: capitalize;
-}
-
+.detail-header h1 { font-size: 24px; margin: 0; }
+.status-badge { padding: 4px 12px; border-radius: 12px; font-size: 14px; color: #fff; text-transform: capitalize; }
 .status-borrowed { background-color: #3b82f6; }
 .status-overdue { background-color: #ef4444; }
 .status-returned { background-color: #10b981; }
 .status-default { background-color: #6b7280; }
-
-.detail-body {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.label {
-  font-weight: 600;
-}
-
-.actions {
-  margin-top: 20px;
-  display: flex;
-  gap: 10px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-}
-
+.detail-body { display: flex; flex-direction: column; gap: 10px; }
+.info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e5e7eb; }
+.label { font-weight: 600; }
+.actions { margin-top: 20px; display: flex; gap: 10px; }
+.btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
 .btn-success { background-color: #10b981; color: white; }
 .btn-success:hover { background-color: #059669; }
-
 .btn-danger { background-color: #ef4444; color: white; }
 .btn-danger:hover { background-color: #dc2626; }
-
 .btn-primary { background-color: #3b82f6; color: white; }
 .btn-primary:hover { background-color: #2563eb; }
-
-.not-found {
-  text-align: center;
-  padding: 60px 0;
-}
+.not-found { text-align: center; padding: 60px 0; }
 </style>
