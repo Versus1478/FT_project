@@ -1,42 +1,62 @@
-# FT_project
+# 📦 Borrow Tracker (Sledovanie požičaných vecí)
 
-This template should help get you started developing with Vue 3 in Vite.
+**Borrow Tracker** je moderná a intuitívna webová aplikácia vyvinutá ako semestrálny projekt pre predmet **Frontendové technológie**. Aplikácia slúži na komplexnú správu vypožičaných predmetov, sledovanie ich stavu, termínov vrátenia a správu kontaktov priateľov. Projekt demonštruje pokročilé využitie ekosystému Vue 3 v kombinácii s TypeScriptom a Vuetify.
 
-## Recommended IDE Setup
+## 🚀 Live Demo
+Aplikácia je plne optimalizovaná, otestovaná a nasadená prostredníctvom GitHub Pages:
+👉 **[https://versus1478.github.io/FT_project/](https://versus1478.github.io/FT_project/)**
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+---
 
-## Recommended Browser Setup
+## 📋 Detailná implementácia požiadaviek
+Tento projekt bol navrhnutý tak, aby pokryl všetky technické kritériá semestrálnej práce:
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+| Požiadavka | Technická implementácia a detaily |
+| :--- | :--- |
+| **Vue 3 (Options API)** | Komponenty využívajú štruktúru `data()`, `methods` a `computed` pre prehľadnú logiku. |
+| **TypeScript** | Prísna typizácia cez `Interfaces`. Každý objekt (Item, Friend) má definovanú dátovú štruktúru. |
+| **Pinia State Management** | Centralizovaná správa stavu rozdelená do reaktívnych modulov `itemsStore` a `friendsStore`. |
+| **Vue Router** | Navigácia cez `createWebHashHistory` pre plnú kompatibilitu so statickým hostingom. |
+| **Vuetify 3** | Profesionálne UI komponenty (grid, formuláre, karty) s implementovanou validáciou vstupov. |
+| **Perzistencia dát** | Plná synchronizácia s `localStorage`. Dáta ostávajú uložené aj po obnovení prehliadača. |
+| **Vlastné komponenty** | Implementovaných viac ako 5 funkčných komponentov (napr. `ItemCard`, `StatusBadge`, `FriendStatsCard`). |
 
-## Type Support for `.vue` Imports in TS
+---
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## 🏗️ Architektúra a logické moduly
 
-## Customize configuration
+### 🧠 Správa stavu (Stores)
+1. **Items Store**:
+   - Spravuje CRUD operácie (pridanie, mazanie, editácia) vypožičaných predmetov.
+   - Obsahuje logiku pre prepočet zostávajúcich dní do vrátenia na základe aktuálneho dátumu.
+   - Dynamicky filtruje položky podľa stavu (Aktívne / Vrátené) a kategórií.
+2. **Friends Store**:
+   - Udržiava databázu priateľov a ich kontaktných údajov.
+   - Agreguje dáta z Items Store, vďaka čomu v reálnom čase zobrazuje štatistiky dlžníkov.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### 📁 Organizácia projektu
+- **`src/components/`**: UI stavebné bloky ako `ItemCard.vue` pre zobrazenie veci або `AddItemForm.vue` pre validovaný formulár.
+- **`src/interfaces/`**: TypeScript modely definujúce štruktúru dát (`Item.ts`, `Friend.ts`, `Category.ts`).
+- **`src/router/`**: Konfigurácia ciest pre Dashboard, Friends, Stats a History.
+- **`src/stores/`**: Pinia modely obsahujúce globálnu logiku, výpočty štatistík a prácu s LocalStorage.
+- **`src/views/`**: Hlavné stránky aplikácie ako Dashboard (prehľad), Stats (grafy) a History (archív).
+- **`src/plugins/`**: Konfigurácia Vuetify, tém a ikon.
+- **`App.vue`**: Root komponent s hlavnou navigáciou, layoutom a bočným menu (drawer).
 
-## Project Setup
+---
 
-```sh
-npm install
-```
+## 📐 Softvérové princípy a čistý kód (SOLID)
+Pri vývoji boli dodržané kľúčové princípy pre zabezpečenie udržateľnosti kódu:
+- **Single Responsibility (SRP)**: Každý modul má jednu úlohu. Napríklad Stores riešia dáta, zatiaľ čo Views riešia len to, ako tieto dáta zobraziť používateľovi.
+- **Interface Segregation**: Použitím TypeScript rozhraní sme zabezpečili, že komponenty pracujú len s tými dátami, ktoré sú pre ne relevantné, čím sa predchádza chybám pri prenose dát.
+- **Konzistencia a integrita**: Akákoľvek zmena v stave (napr. vrátenie veci) sa okamžite atomicky premietne do všetkých súvisiacich pohľadov, grafov a štatistík priateľov.
+- **Dry (Don't Repeat Yourself)**: Opakujúce sa UI prvky (ako statusy položiek) sú vynesené do samostatných komponentov.
 
-### Compile and Hot-Reload for Development
+---
 
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
+## 💻 Používateľské rozhranie a UX
+Aplikácia je navrhnutá s dôrazom na jednoduchosť, prístupnosť a prehľadnosť:
+- **Dashboard**: Farebne odlíšené karty podľa stavu (Zelená - v termíne, Červená - po termíne).
+- **Štatistiky**: Interaktívna vizualizácia kategórií a hodnôt požičaných vecí.
+- **Validácia**: Robustná validácia formulárov cez Vuetify pravidlá (rules), ktorá nepovolí uloženie neúplných dát.
+- **Responzivita**: Layout je prispôsobený pre mobilné zariadenia aj desktopy vďaka Vuetify grid systému.
