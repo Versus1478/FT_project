@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import type { Friend } from '@/types/Item'
-import { v4 as uuidv4 } from 'uuid'
+import {defineStore} from 'pinia'
+import type {Friend} from '@/types/Item'
+import {v4 as uuidv4} from 'uuid'
 import {useItemsStore} from './items'
 
 interface FriendsState {
@@ -37,7 +37,7 @@ const useFriendsStore = defineStore('friends', {
             if (index !== -1) {
                 const currentFriend = this.friends[index]
                 if (!currentFriend) return
-                const updatedFriend: Friend = {
+                this.friends[index] = {
                     id: currentFriend.id,
                     name: updates.name ?? currentFriend.name,
                     email: updates.email ?? currentFriend.email,
@@ -46,7 +46,6 @@ const useFriendsStore = defineStore('friends', {
                     borrowedCount: updates.borrowedCount ?? currentFriend.borrowedCount,
                     totalValue: updates.totalValue ?? currentFriend.totalValue
                 }
-                this.friends[index] = updatedFriend
                 this.saveToLocalStorage()
             }
         },
@@ -103,7 +102,7 @@ const useFriendsStore = defineStore('friends', {
 
         initMockData() {
             if (this.friends.length === 0) {
-                const mockFriends: Friend[] = [
+                this.friends = [
                     {
                         id: '1',
                         name: 'Peter Novák',
@@ -121,7 +120,6 @@ const useFriendsStore = defineStore('friends', {
                         totalValue: 120
                     }
                 ]
-                this.friends = mockFriends
                 this.saveToLocalStorage()
             }
         }

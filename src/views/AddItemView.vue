@@ -105,6 +105,7 @@ export default defineComponent({
       if (this.form.expectedReturn < this.form.borrowedDate) return alert('Dátum vrátenia nemôže byť pred dátumom požičania')
 
       this.itemsStore.addItem({
+        friendId: this.form.friendId,
         itemName: this.form.itemName,
         description: this.form.description,
         category: this.form.category as ItemCategory,

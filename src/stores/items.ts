@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import type { BorrowedItem, ItemStatus } from '@/types/Item'
-import { v4 as uuidv4 } from 'uuid'
+import {defineStore} from 'pinia'
+import type {BorrowedItem, ItemStatus} from '@/types/Item'
+import {v4 as uuidv4} from 'uuid'
 
 interface ItemsState {
     items: BorrowedItem[]
@@ -155,7 +155,7 @@ export const useItemsStore = defineStore('items', {
         },
 
         initMockData() {
-            const mockItems: BorrowedItem[] = [
+            this.items = [
                 {
                     id: uuidv4(),
                     itemName: 'PlayStation 5',
@@ -165,6 +165,7 @@ export const useItemsStore = defineStore('items', {
                         id: '1',
                         name: 'Peter Novák'
                     },
+                    friendId: "1",
                     borrowedDate: '2024-11-15',
                     expectedReturn: '2024-12-30',
                     actualReturn: null,
@@ -181,6 +182,7 @@ export const useItemsStore = defineStore('items', {
                         id: '2',
                         name: 'Jana Kováčová'
                     },
+                    friendId: "2",
                     borrowedDate: '2024-10-05',
                     expectedReturn: '2024-11-10',
                     actualReturn: null,
@@ -188,8 +190,6 @@ export const useItemsStore = defineStore('items', {
                     value: 120
                 }
             ]
-
-            this.items = mockItems
             this.saveToLocalStorage()
         }
     }
