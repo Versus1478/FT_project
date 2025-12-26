@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent } from 'vue'
 import { useItemsStore } from '@/stores/items'
 import useFriendsStore from '@/stores/friends'
 import type { ItemCategory, Friend } from '@/types/Item'

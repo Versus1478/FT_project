@@ -149,7 +149,7 @@ export const useItemsStore = defineStore('items', {
                     this.initMockData()
                 }
             } catch (e) {
-                console.error('Pomилка завантаження даних', e)
+                console.error('Chyba načítania údajov', e)
                 this.initMockData()
             }
         },

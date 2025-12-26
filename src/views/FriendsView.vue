@@ -43,7 +43,6 @@
       <button @click="showModal = true" class="btn btn-primary">+ Pridať prvého priateľa</button>
     </div>
 
-    <!-- Modal -->
     <div v-if="showModal" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -163,7 +162,6 @@ export default defineComponent({
         phone: this.form.phone.trim()
       })
 
-      // Reset formulára
       this.form = {
         name: '',
         email: '',
@@ -198,7 +196,6 @@ export default defineComponent({
 
     closeModal() {
       this.showModal = false
-      // Reset form pri zatvorení
       this.form = {
         name: '',
         email: '',

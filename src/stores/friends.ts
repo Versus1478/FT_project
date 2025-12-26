@@ -95,7 +95,7 @@ const useFriendsStore = defineStore('friends', {
                 try {
                     this.friends = JSON.parse(stored)
                 } catch (e) {
-                    console.error('Помилка завантаження друзів', e)
+                    console.error('Chyba pri načítavaní priateľov', e)
                 }
             }
         },

@@ -111,10 +111,7 @@ body {
   color: #1f2937;
   background: #f3f4f6;
 }
-.nav-link.router-link-active {
-  color: #3b82f6;
-  background: #dbeafe;
-}
+
 .btn-add {
   background: #3b82f6;
   color: white !important;
@@ -139,10 +136,5 @@ body {
   color: #6b7280;
   font-size: 14px;
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
+
 </style>
